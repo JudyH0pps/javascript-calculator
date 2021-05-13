@@ -1,47 +1,77 @@
 const setEvent = () => {
     const $calculator = document.querySelector(".calculator");
-    $calculator.addEventListener('click', (event) => {
+    $calculator.addEventListener("click", (event) => {
         const target = event.target;
-        if (target.classList.contains("digit") || target.classList.contains('operation') && target.innerText !== '=') {
+        if (target.classList.contains("digit")) {
             plusDigit(target.innerHTML);
         }
         if (target.classList.contains("modifier")) {
             resetNumber();
         }
-        if (target.innerText === '=') {
+        if (target.innerText === "=") {
             calculate();
+        } else if (target.classList.contains("operation")) {
+            setOp(target.innerText);
         }
     });
-}
+};
 
 const resetNumber = () => {
-    setState({ display: '0' })
-}
+    const nextState = {
+        nums: [0, 0],
+        op: "",
+    };
+    setState(nextState);
+};
 
 const plusDigit = (number) => {
-    let display = state.display;
-    if (display === '0') {
-        display = number;
-    } else {
-        display = display + number;
+    let nums = state.nums;
+    if (state.op === "" && nums[0] < 100) {
+        nums[0] = nums[0] * 10 + number * 1;
+    } else if (state.op !== "" && nums[1] < 100) {
+        nums[1] = nums[1] * 10 + number * 1;
     }
-    setState({ display });
+    setState({ nums })
+};
+
+const setOp = (op) => {
+    setState({ op });
+}
+
+const calculate = () => {
+    let result = state.nums[0];
+    switch (state.op) {
+        case '+':
+            result = state.nums[0] + state.nums[1];
+            break;
+        case '-':
+            result = state.nums[0] - state.nums[1];
+            break;
+        case 'X':
+            result = state.nums[0] * state.nums[1];
+            break;
+        case '/':
+            result = Math.floor(state.nums[0] / state.nums[1]);
+    }
+    setState({ nums: [result, 0], op: "" })
 }
 
 const render = () => {
     const $display = document.querySelector("#total");
-    $display.innerText = state.display;
-}
+    let display = state.nums[0];
+    if (state.op !== "") display += state.op;
+    if (state.op !== "" && state.nums[1] !== 0) display += state.nums[1];
+    $display.innerText = display;
+};
 
 const setState = (nextState) => {
-    state = { ...state, ...nextState }
+    state = { ...state, ...nextState };
     render();
-}
+};
 
 let state = {
-    idx: 0,
-    num1: '0',
-    num2: ''
+    nums: [0, 0],
+    op: "",
 };
 
 setEvent();
